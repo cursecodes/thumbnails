@@ -1,3 +1,6 @@
+import { ExecutionContext } from "@cloudflare/workers-types";
+import { IRequest } from "itty-router";
+
 export function base64Encode(buf: ArrayBuffer): string {
     let string = "";
     new Uint8Array(buf).forEach((byte) => {
@@ -17,8 +20,22 @@ export function base64Decode(string: string): ArrayBuffer {
     return buf;
 }
 
-export async function baseRequest(url: string): Promise<Response> {
-    const thumbnail: Response = await fetch(url);
+export async function baseRequest(url: string, request: IRequest, context: ExecutionContext): Promise<Response> {
+    const thumbnail = await fetch(url);
+
+    const cache = caches.default
+
+    const cachedResponse = await cache.match(request.url)
+
+    if (cachedResponse) {
+        console.log("CACHE HIT")
+        console.log(cachedResponse)
+        const response = cachedResponse.clone()
+        return new Response(response.body, response)
+    }
+
+    console.log("CACHE MISS")
+
     const json: ThumbnailResponse = await thumbnail.json();
 
     if (!thumbnail.ok) {
@@ -45,14 +62,18 @@ export async function baseRequest(url: string): Promise<Response> {
     }
 
 
-    const image: Response = await fetch(json.data?.[0].imageUrl);
+    const image = await fetch(json.data?.[0].imageUrl);
 
     const text = base64Encode(await image.arrayBuffer());
     const bin = base64Decode(text);
 
-    return new Response(bin, {
-        headers: { "Content-Type": "image/png", "Cache-Control": "s-maxage=43200" },
+    const response = new Response(bin, {
+        headers: { "Content-Type": "image/png", "cache-control": "public, s-maxage=14400" },
     });
+
+    context.waitUntil(cache.put(request.url, response.clone()))
+
+    return response
 }
 
 export interface ThumbnailResponse {

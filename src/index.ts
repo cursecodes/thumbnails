@@ -1,4 +1,3 @@
-import { Event } from "@cloudflare/workers-types";
 import { Router, IRequest } from "itty-router";
 import { baseRequest } from "./lib";
 

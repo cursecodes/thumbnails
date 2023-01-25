@@ -17,7 +17,7 @@ export function base64Decode(string: string): ArrayBuffer {
     return buf;
 }
 
-export async function baseRequest(url) {
+export async function baseRequest(url: string): Promise<Response> {
     const thumbnail = await fetch(url);
 
     if (!thumbnail.ok) {

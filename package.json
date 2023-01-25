@@ -3,6 +3,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
-    "itty-router": "^3.0.11"
+    "itty-router": "^3.0.11",
+    "zod": "^3.20.2"
   }
 }

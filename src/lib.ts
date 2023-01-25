@@ -29,9 +29,8 @@ export async function baseRequest(url: string, request: IRequest, context: Execu
 
     if (cachedResponse) {
         console.log("CACHE HIT")
-        console.log(cachedResponse)
-        const response = cachedResponse.clone()
-        return new Response(response.body, response)
+
+        return new Response(cachedResponse.body, cachedResponse)
     }
 
     console.log("CACHE MISS")

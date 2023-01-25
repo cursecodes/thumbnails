@@ -63,6 +63,6 @@ app.all(
   () => new Response(JSON.stringify({ message: "URL does not exist, or format is incorrect." }), { status: 404 })
 );
 
-addEventListener("fetch", (event) =>
-  event.respondWith(app.handle(event.request))
-);
+export default {
+  fetch: app.handle
+}

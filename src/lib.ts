@@ -18,22 +18,34 @@ export function base64Decode(string: string): ArrayBuffer {
 }
 
 export async function baseRequest(url: string): Promise<Response> {
-    const thumbnail = await fetch(url);
+    const thumbnail: Response = await fetch(url);
+    const json: ThumbnailResponse = await thumbnail.json();
 
     if (!thumbnail.ok) {
+        if (json.data && !json.data.length) {
+            return new Response(
+                JSON.stringify({
+                    message: "User does not exist.",
+                    url,
+
+                }),
+                { status: 400 }
+            );
+        }
+
         return new Response(
             JSON.stringify({
-                message: "Thumbnail probably does not exist",
+                message: json.errors?.[0].message,
                 url,
                 robloxStatusCode: thumbnail.status,
+
             }),
             { status: 400 }
         );
     }
 
-    const json: ThumbnailResponse = await thumbnail.json();
 
-    const image = await fetch(json.data?.[0].imageUrl);
+    const image: Response = await fetch(json.data?.[0].imageUrl);
 
     const text = base64Encode(await image.arrayBuffer());
     const bin = base64Decode(text);
@@ -44,5 +56,19 @@ export async function baseRequest(url: string): Promise<Response> {
 }
 
 export interface ThumbnailResponse {
-    data: unknown
+    data?: Array<ThumbnailData>
+    errors?: Array<ThumbnailError>
+}
+
+export interface ThumbnailData {
+    targetId: number
+    state: string
+    imageUrl: string
+}
+
+export interface ThumbnailError {
+    code: number
+    message: string
+    userFacingMessage: string
+    field: string
 }

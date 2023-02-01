@@ -21,7 +21,7 @@ export function base64Decode(string: string): ArrayBuffer {
 }
 
 export async function baseRequest(url: string, request: IRequest, context: ExecutionContext): Promise<Response> {
-    const thumbnail = await fetch(url);
+    
 
     const cache = caches.default
 
@@ -34,6 +34,8 @@ export async function baseRequest(url: string, request: IRequest, context: Execu
     }
 
     console.log("CACHE MISS")
+    
+    const thumbnail = await fetch(url);
 
     const json: ThumbnailResponse = await thumbnail.json();
 
